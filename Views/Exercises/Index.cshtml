@@ -31,29 +31,33 @@
         </tr>
     </thead>
     <tbody>
-@foreach (var item in Model) {
-        <tr>
-            <td>
-                @Html.DisplayFor(modelItem => item.Weight)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Reps)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Series)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Session.Start) - @Html.DisplayFor(modelItem => item.Session.Id)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.ExerciseType.Name)
-            </td>
-            <td>
-                <a asp-action="Edit" asp-route-id="@item.Id">Edit</a> |
-                <a asp-action="Details" asp-route-id="@item.Id">Details</a> |
-                <a asp-action="Delete" asp-route-id="@item.Id">Delete</a>
-            </td>
-        </tr>
-}
+        @foreach (var item in Model)
+        {
+            if (User.Identity.Name == item.UserId)  // Dodaj warunek, aby pokazywać tylko wyniki danego użytkownika
+            {
+                <tr>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.Weight)
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.Reps)
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.Series)
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.Session.Start) - @Html.DisplayFor(modelItem => item.Session.Id)
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.ExerciseType.Name)
+                    </td>
+                    <td>
+                        <a asp-action="Edit" asp-route-id="@item.Id">Edit</a> |
+                        <a asp-action="Details" asp-route-id="@item.Id">Details</a> |
+                        <a asp-action="Delete" asp-route-id="@item.Id">Delete</a>
+                    </td>
+                </tr>
+            }
+        }
     </tbody>
 </table>

@@ -23,10 +23,36 @@ namespace WebApplication1.Controllers
         // GET: UserStatistics
         public async Task<IActionResult> Index()
         {
-            // Pobierz dane (userStatistics) z bazy danych
-            var userStatistics = _context.UserStatistic.ToList();
+            string userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            var userStatistics = new List<UserStatistic>();
 
-            // Przekaz dane do widoku
+            var exerciseTypes = await _context.ExerciseType.ToListAsync();
+
+            foreach (var exerciseType in exerciseTypes)
+            {
+                var sessions = await _context.Session
+                    .Where(s => s.UserId == userId)
+                    .Include(s => s.Exercises)
+                    .Where(s => s.Exercises.Any(e => e.ExerciseTypeId == exerciseType.Id))
+                    .ToListAsync();
+
+                var sessionsInLastFourWeeks = sessions.Count(s => s.Start >= DateTime.Now.AddDays(-28));
+
+                var bestResult = sessions
+                    .SelectMany(s => s.Exercises)
+                    .Where(e => e.ExerciseTypeId == exerciseType.Id)
+                    .OrderByDescending(e => e.Weight * e.Reps * e.Series)
+                    .FirstOrDefault();
+
+                userStatistics.Add(new UserStatistic
+                {
+                    UserId = userId,
+                    ExerciseTypeId = exerciseType.Id,
+                    SessionsInLastFourWeeks = sessionsInLastFourWeeks,
+                    BestResult = bestResult != null ? bestResult.Weight * bestResult.Reps * bestResult.Series : 0
+                });
+            }
+
             return View(userStatistics);
 
         }
